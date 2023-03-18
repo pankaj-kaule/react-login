@@ -11,34 +11,40 @@ const LoginForm = () => {
     event.preventDefault();
     setShowErrorMessage(false);
 
-    try {
-      const response = await axios.post(process.env.REACT_APP_REST_API + '/user/login', {
-        username,
-        password,
-      });
+    const response = await axios.post(process.env.REACT_APP_REST_API + '/user/login', {
+      username,
+      password,
+    })
+    .then(function (response) {
+
       console.log("response",  response);
-      if(response.data.success){
-        console.log("");
+      if(Object.keys(response.data.result).length > 0 && Object.keys(response.data.result.data).length > 0){
         localStorage.setItem('token', response.data.result.data.token);
         window.location.href = '/dashboard';
       
       }else{
+        console.log("login failed ");
         setShowErrorMessage(true);
         setErrorMessage('Invalid Username or Password.!');
       }
-    } catch (error) {
-      console.error(error);
-    }
 
-  };
+    }).catch(function (error) {
+
+      console.log("API error");
+      console.error(error);
+    
+    });
+  }
 
   return (
+    <div>
     <form style={{"margin-top":"50px", "padding" : "20px", "display" : "flex" , "justify-content": "center"}} className="space-between" onSubmit={handleSubmit}>
       <input
         type="text"
         placeholder="Username"
         value={username}
-        style={{"padding": "20px"}}
+        required
+        style={{"padding": "20px", "border-radius" : "10px", "border-color" : showerrorMessage ? "red" : ""}}
         onChange={(event) => setUsername(event.target.value)}
       />
       
@@ -46,11 +52,18 @@ const LoginForm = () => {
         type="password"
         placeholder="Password"
         value={password}
-        style={{"padding": "20px"}}
+        required
+        style={{"padding": "20px", "border-radius" : "10px", "border-color" : showerrorMessage ? "red" : "" }}
         onChange={(event) => setPassword(event.target.value)}
       />
-      <button className="action-button" type="submit">Login</button>
+      <button className="action-button" type="submit">Login</button>      
     </form>
+    <div style={{"text-align": "center"}}>
+      <span>
+          {showerrorMessage === true ? errorMessage : null}
+      </span>
+    </div>
+    </div>
   );
 };
 
